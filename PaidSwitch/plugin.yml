@@ -1,0 +1,38 @@
+name: PaidSwitch
+main: pl.interia.wolf480.PaidSwitch.PaidSwitch
+version: 0.1
+depend: [Vault]
+commands:
+    paidswitch:
+        description: Info about PaidSwitch and config reload.
+        aliases: [paidsw, psw]
+        parmission: paidswitch.admin
+        usage: |
+            PaidSwitch 0.1 by Wolf480pl\n
+            Usage:\n
+            /paidswitch reload - reload config.yml\n
+            Aliases: /paidsw, /psw
+permissions:
+    paidswitch.*:
+        description: Gives all PaidSwitch permissions excepting free use.
+        children:
+            paidswitch.use: true
+            paidswitch.create: true
+            paidswitch.create.others: true
+    paidswitch.use:
+        description: Allows to use PaidSwitches.
+        default: true
+    paidswitch.use.free:
+        description: Allows to use PaidSwitches for free.
+        default: false
+        children:
+            paidswitch.use: true
+    paidswitch.create:
+        description: Allows to create PaidSwitches.
+        default: op
+    paidswitch.create.others:
+        description: Allows to create PaidSwitches for someone else.
+        default: op
+    paidswitch.admin:
+        description: Gives access to /paidswitch command.
+        default: op

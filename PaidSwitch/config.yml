@@ -1,0 +1,12 @@
+earn-for-free: false
+messages:
+    use-noperm: You have no permissions to use PaidSwitches!
+    use-free: You used PaidSwitch for free!
+    use-paid: You paid %s for activating the switch.\n Now you have %s
+    use-need: You need %s to activate the switch.
+    create-noperm: You don't have permission to create PaidSwitch!
+    create-noswitch: No switch found!
+    create-others: You don't have permission to create PaidSwitch for other players!
+    create-noaccount: Account %s does not exist!
+    create-noprice: "Invalid price: %s"
+    create-ok: Succesfully created PaidSwitch!
