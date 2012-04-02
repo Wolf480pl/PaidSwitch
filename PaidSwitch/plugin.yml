@@ -1,5 +1,5 @@
 name: PaidSwitch
-main: pl.interia.wolf480.PaidSwitch.PaidSwitch
+main: com.github.wolf480pl.PaidSwitch.PaidSwitch
 version: 0.1
 depend: [Vault]
 commands:
@@ -8,9 +8,9 @@ commands:
         aliases: [paidsw, psw]
         parmission: paidswitch.admin
         usage: |
-            PaidSwitch 0.1 by Wolf480pl\n
-            Usage:\n
-            /paidswitch reload - reload config.yml\n
+            PaidSwitch 0.1 by Wolf480pl (wolf480@interia.pl)
+            Usage:
+            /paidswitch reload - reload config.yml
             Aliases: /paidsw, /psw
 permissions:
     paidswitch.*:

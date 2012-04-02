@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="WINDOWS-1250" standalone="no"?>
 <jardesc>
-    <jar path="PaidSwitch.jar"/>
+    <jar path="C:/Documents and Settings/Wojtek/repo/PaidSwitch/PaidSwitch.jar"/>
     <options buildIfNeeded="true" compress="true" descriptionLocation="/PaidSwitch/PaidSwitch.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>
