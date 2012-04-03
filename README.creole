@@ -1,0 +1,63 @@
+== PaidSwitch ==
+Make your players pay other players for using their switches.
+
+[[http://dev.bukkit.org/server-mods/paidswitch/files/2-paid-switch-0-1/|Download]] | [[https://github.com/Wolf480pl/PaidSwitch|Source]]
+=== Features: ===
+* Supported switches: pressure plates (wood and stone), stone button, leaver.
+* Sign-based switch setup.
+* Economy support: all economy plugins supported by [[http://dev.bukkit.org/server-mods/vault/|Vault]].
+* Permission support: all SuperPerms-compatible permission plugins (tell me if you want support for older permission plugins)
+=== Usage: ===
+To make your switch paid, put a sign next to the switch, and fill it with pattern below:
+
+Line 1: [PaidSw]\\
+Line 2: //account name / leave blank//\\
+Line 3: //cost//\\
+Line 4: //anything//
+
+If there's more than one sign next to switch, first sign found will be used (searching order: UP, NORTH, EAST, SOUTH, WEST, DOWN)
+
+If line 2 is empty, your name will be put there automatically.\\
+You can also specify name of other player or economy account in line 2 if you have paidswitch.create.others permission.
+===== Commands: =====
+<<code yaml>>
+/paidswitch - display info about plugin
+/paidswitch reload - reload config.yml
+aliases: /paidsw, /psw
+<</code>>
+===== Permissions: =====
+
+    paidswitch.*:\\
+        description: Gives all PaidSwitch permissions excepting free use.\\
+        children:\\
+            paidswitch.use: true\\
+            paidswitch.create: true\\
+            paidswitch.create.others: true\\
+    paidswitch.use:\\
+        description: Allows to use PaidSwitches.\\
+        default: true\\
+    paidswitch.use.free:\\
+        description: Allows to use PaidSwitches for free.\\
+        default: false\\
+        children:\\
+            paidswitch.use: true\\
+    paidswitch.create:\\
+        description: Allows to create PaidSwitches.\\
+        default: op\\
+    paidswitch.create.others:\\
+        description: Allows to create PaidSwitches for someone else.\\
+        default: op\\
+    paidswitch.admin:\\
+        description: Gives access to /paidswitch command.\\
+        default: op\\
+
+=== Configuration: ===
+
+earn-for-free: false    - should switch owner earn money, when switch user has paidswitch.use.free permission?\\
+messages: (...)         - you can translate them if you want\\
+
+
+=== Known Bugs: ===
+* [[https://github.com/Wolf480pl/PaidSwitch/issues/2|LWC Bug]]
+=== Planned Features: ===
+Waiting for your suggestions.

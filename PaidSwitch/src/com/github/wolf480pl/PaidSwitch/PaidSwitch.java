@@ -50,7 +50,6 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 	private Economy eco;
 	public void onEnable(){
 		log = getLogger();
-//		log.info("Yeah! Plugin sie wlaczyl!");
 		getServer().getPluginManager().registerEvents(this, this);
 		if(SetupEco())
 			log.info("Vault economy found.");
@@ -60,7 +59,6 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 		saveConfig();
 	}
 	public void onDisable(){
-//		log.info("Wylaczam sie, mam nadzieje ze sobie beze mnie poradzisz.");
 	}
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
 		if(cmd.getName().equalsIgnoreCase("paidswitch")){
@@ -122,10 +120,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 	}
 	@EventHandler
 	public void onSignChange(SignChangeEvent event){
-//		getServer().broadcastMessage("SignChange!");
 		if (event.isCancelled()) return;
-//		getServer().broadcastMessage("SignChange (no cancell)!");
-//		Sign bl = (Sign) event.getBlock().getState();
 		if(!event.getLine(0).equalsIgnoreCase("[PaidSw]")){
 //			getServer().broadcastMessage(String.format("%s doesn't match [PaidSw]",event.getLine(0)));
 			return;
@@ -168,7 +163,6 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 			event.getBlock().breakNaturally();
 			return;
 		}
-//		bl.update();
 		event.getPlayer().sendMessage(getConfig().getString("messages.create-ok"));
 	}
 	private Payment findSign(Block block){
