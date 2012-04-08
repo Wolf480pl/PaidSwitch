@@ -109,7 +109,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 					if(eco.has(event.getPlayer().getName(), paid.Amount)){
 						EconomyResponse response = eco.withdrawPlayer(event.getPlayer().getName(),paid.Amount);
 						eco.depositPlayer(paid.Account, paid.Amount);
-						event.getPlayer().sendMessage(String.format(getConfig().getString("messages.use-paid"),eco.format(paid.Amount),eco.format(response.balance)));
+						event.getPlayer().sendMessage(String.format(getConfig().getString("messages.use-paid"),eco.format(paid.Amount),eco.format(response.balance)).replaceAll("/n", "\n").split("\n"));
 					} else {
 						event.getPlayer().sendMessage(String.format(getConfig().getString("messages.use-need"),eco.format(paid.Amount)));
 						event.setCancelled(true);
@@ -178,7 +178,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 	private Payment checkSign(Block block, BlockFace face){
 		BlockState bl = block.getRelative(face).getState();
 		if(bl instanceof Sign){
-			getServer().broadcastMessage(((Sign) bl).getLine(0));
+//			getServer().broadcastMessage(((Sign) bl).getLine(0));
 			if(((Sign) bl).getLine(0).equalsIgnoreCase("[PaidSw]"))
 				return new Payment(((Sign) bl).getLine(1),((Sign) bl).getLine(2));
 		}
