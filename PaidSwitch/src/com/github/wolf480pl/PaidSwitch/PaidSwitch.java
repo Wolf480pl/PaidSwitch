@@ -39,6 +39,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 //import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -129,12 +130,14 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 		if(!event.getPlayer().hasPermission("paidswitch.create")){
 			event.getPlayer().sendMessage(getConfig().getString("messages.create-noperm"));
 			event.setCancelled(true);
+			getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
 			event.getBlock().breakNaturally();
 			return;
 		}
 		if(!findSwitch(event.getBlock())){
 			event.getPlayer().sendMessage(getConfig().getString("messages.create-noswitch"));
 			event.setCancelled(true);
+			getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
 			event.getBlock().breakNaturally();
 			return;
 		}
@@ -142,12 +145,14 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 			if(!event.getPlayer().hasPermission("paidswitch.create.others")){
 				event.getPlayer().sendMessage(getConfig().getString("messages.create-others"));
 				event.setCancelled(true);
+				getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
 				event.getBlock().breakNaturally();
 				return;					
 			}
 			if(!eco.hasAccount(event.getLine(1))){
 				event.getPlayer().sendMessage(String.format(getConfig().getString("messages.create-noaccount"),(event.getLine(1))));
 				event.setCancelled(true);
+				getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
 				event.getBlock().breakNaturally();
 				return;										
 			}
@@ -160,6 +165,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 		} catch (NumberFormatException ex) {
 			event.getPlayer().sendMessage(String.format(getConfig().getString("messages.create-noprice"),(event.getLine(2))));
 			event.setCancelled(true);
+			getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
 			event.getBlock().breakNaturally();
 			return;
 		}
