@@ -23,6 +23,7 @@ distribution.
 
 package com.github.wolf480pl.PaidSwitch;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,13 +37,20 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+//import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-//import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.vehicle.VehicleMoveEvent;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -90,7 +98,8 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 //		getServer().broadcastMessage(msg);
 		if(isSwitch(event.getClickedBlock())){
 			Payment paid = findSign(event.getClickedBlock());
-			if((paid != null) && paid.isValid()){
+			event.setCancelled(!processPayment(paid, event.getPlayer()));
+/*			if((paid != null) && paid.isValid()){
 				if(!event.getPlayer().hasPermission("paidswitch.use")){
 					event.getPlayer().sendMessage(getConfig().getString("messages.use-noperm"));
 					event.setCancelled(true);
@@ -116,7 +125,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 						event.setCancelled(true);
 					}
 				}
-			}
+			}*/
 		}
 	}
 	@EventHandler
@@ -134,7 +143,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 			event.getBlock().breakNaturally();
 			return;
 		}
-		if(!findSwitch(event.getBlock())){
+		if(!findSwitch(event.getBlock(), true)){
 			event.getPlayer().sendMessage(getConfig().getString("messages.create-noswitch"));
 			event.setCancelled(true);
 			getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
@@ -171,6 +180,71 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 		}
 		event.getPlayer().sendMessage(getConfig().getString("messages.create-ok"));
 	}
+	@EventHandler()
+	public void onVehicleMove(VehicleMoveEvent event){
+		if(event.getVehicle().getType() != EntityType.MINECART) return;
+		List<MetadataValue> data = event.getTo().getBlock().getMetadata("paidswitch.allow");
+		if(!data.isEmpty() && data.get(0).asBoolean()) return;
+		if(isRailSwitch(event.getFrom().getBlock())){
+			Payment payment = findSign(event.getFrom().getBlock());
+			if(payment != null && payment.isValid()){
+				event.getFrom().getBlock().setMetadata("paidswitch.allow", new FixedMetadataValue(this, false));
+			}
+		}
+		if(isRailSwitch(event.getTo().getBlock())){
+			Entity passanger = event.getVehicle().getPassenger();
+			if(passanger == null || !(passanger instanceof Player)) {
+				event.getTo().getBlock().setMetadata("paidswitch.allow", new FixedMetadataValue(this, false));
+			} else {
+				if(data.isEmpty() || (!data.get(0).asBoolean())){
+					Payment payment = findSign(event.getTo().getBlock());
+					boolean can = processPayment(payment, (Player)passanger);
+					event.getTo().getBlock().setMetadata("paidswitch.allow", new FixedMetadataValue(this, can));
+				}
+			}
+//			getServer().broadcastMessage(((passanger != null) ? passanger.getType().getName() + " in " : "") + event.getVehicle().getType().getName() + " moved onto " + event.getTo().getBlock().getType().name());
+		}
+	}
+	@EventHandler()
+	public void onRedstoneChange(BlockRedstoneEvent event){
+		if(!isRailSwitch(event.getBlock())) return;
+		List<MetadataValue> data = event.getBlock().getMetadata("paidswitch.allow");
+//		log.info(String.valueOf(event.getNewCurrent()) + " | " + data.toString());
+		Payment payment = findSign(event.getBlock());
+		if(data.isEmpty() || (payment != null && payment.isValid() && (!data.get(0).asBoolean())))
+			event.setNewCurrent(0);
+		
+	}
+	private boolean processPayment(Payment paid, Player player){
+		if((paid != null) && paid.isValid()){
+			if(!player.hasPermission("paidswitch.use")){
+				player.sendMessage(getConfig().getString("messages.use-noperm"));
+				return false;
+			}
+//			getServer().broadcastMessage(paid.Amount + " for " + paid.Account);
+			if(player.hasPermission("paidswitch.use.free")){
+				player.sendMessage(getConfig().getString("messages.use-free"));
+				if(getConfig().getBoolean("earn-for-free")) eco.depositPlayer(paid.Account, paid.Amount);
+				return true;
+			}
+			if((eco == null) && !SetupEco()){
+				log.log(Level.SEVERE,"No economy plugin found!");
+				if(!player.getName().equalsIgnoreCase(paid.Account))
+					return false;
+			} else {
+				if(eco.has(player.getName(), paid.Amount)){
+					EconomyResponse response = eco.withdrawPlayer(player.getName(),paid.Amount);
+					eco.depositPlayer(paid.Account, paid.Amount);
+					player.sendMessage(String.format(getConfig().getString("messages.use-paid"),eco.format(paid.Amount),eco.format(response.balance)).replaceAll("/n", "\n").split("\n"));
+				} else {
+					player.sendMessage(String.format(getConfig().getString("messages.use-need"),eco.format(paid.Amount)));
+					return false;
+				}
+			}
+		}
+		return true;
+
+	}
 	private Payment findSign(Block block){
 		Payment paid = checkSign(block, BlockFace.UP);
 		if(paid == null) paid = checkSign(block, BlockFace.NORTH);
@@ -202,12 +276,15 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 				block.getType().equals(Material.STONE_BUTTON) ||
 				block.getType().equals(Material.LEVER);
 	}
-	private boolean findSwitch(Block block){
-		return isSwitch(block.getRelative(BlockFace.DOWN)) || 
-				isSwitch(block.getRelative(BlockFace.SOUTH)) || 
-				isSwitch(block.getRelative(BlockFace.WEST)) || 
-				isSwitch(block.getRelative(BlockFace.NORTH)) || 
-				isSwitch(block.getRelative(BlockFace.EAST)) || 
-				isSwitch(block.getRelative(BlockFace.UP));
+	private boolean isRailSwitch(Block  block){
+		return block.getType() == Material.DETECTOR_RAIL;
+	}
+	private boolean findSwitch(Block block, boolean rail){
+		return isSwitch(block.getRelative(BlockFace.DOWN)) || (rail && isRailSwitch(block.getRelative(BlockFace.DOWN))) || 
+				isSwitch(block.getRelative(BlockFace.SOUTH)) || (rail && isRailSwitch(block.getRelative(BlockFace.SOUTH))) || 
+				isSwitch(block.getRelative(BlockFace.WEST)) ||  (rail && isRailSwitch(block.getRelative(BlockFace.WEST))) ||
+				isSwitch(block.getRelative(BlockFace.NORTH)) ||  (rail && isRailSwitch(block.getRelative(BlockFace.NORTH))) ||
+				isSwitch(block.getRelative(BlockFace.EAST)) ||  (rail && isRailSwitch(block.getRelative(BlockFace.EAST))) ||
+				isSwitch(block.getRelative(BlockFace.UP)) || (rail && isRailSwitch(block.getRelative(BlockFace.UP)));
 	}
 }
