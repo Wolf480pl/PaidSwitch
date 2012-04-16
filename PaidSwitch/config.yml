@@ -1,4 +1,5 @@
 earn-for-free: false
+detector-rail: true
 messages:
     use-noperm: You have no permissions to use PaidSwitches!
     use-free: You used PaidSwitch for free!

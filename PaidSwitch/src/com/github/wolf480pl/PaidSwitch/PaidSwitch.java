@@ -143,7 +143,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 			event.getBlock().breakNaturally();
 			return;
 		}
-		if(!findSwitch(event.getBlock(), true)){
+		if(!findSwitch(event.getBlock(), getConfig().getBoolean("detector-rail"))){
 			event.getPlayer().sendMessage(getConfig().getString("messages.create-noswitch"));
 			event.setCancelled(true);
 			getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
@@ -182,6 +182,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 	}
 	@EventHandler()
 	public void onVehicleMove(VehicleMoveEvent event){
+		if(!getConfig().getBoolean("detector-rail")) return;
 		if(event.getVehicle().getType() != EntityType.MINECART) return;
 		List<MetadataValue> data = event.getTo().getBlock().getMetadata("paidswitch.allow");
 		if(!data.isEmpty() && data.get(0).asBoolean()) return;
@@ -207,6 +208,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 	}
 	@EventHandler()
 	public void onRedstoneChange(BlockRedstoneEvent event){
+		if(!getConfig().getBoolean("detector-rail")) return;
 		if(!isRailSwitch(event.getBlock())) return;
 		List<MetadataValue> data = event.getBlock().getMetadata("paidswitch.allow");
 //		log.info(String.valueOf(event.getNewCurrent()) + " | " + data.toString());
