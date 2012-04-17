@@ -226,7 +226,11 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 //			getServer().broadcastMessage(paid.Amount + " for " + paid.Account);
 			if(player.hasPermission("paidswitch.use.free")){
 				player.sendMessage(getConfig().getString("messages.use-free"));
-				if(getConfig().getBoolean("earn-for-free")) eco.depositPlayer(paid.Account, paid.Amount);
+				if(getConfig().getBoolean("earn-for-free"))
+					if(eco == null && !SetupEco())
+						log.log(Level.SEVERE,"No economy plugin found!");
+					else
+						paid.execute(eco);
 				return true;
 			}
 			if((eco == null) && !SetupEco()){
@@ -236,7 +240,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 			} else {
 				if(eco.has(player.getName(), paid.Amount)){
 					EconomyResponse response = eco.withdrawPlayer(player.getName(),paid.Amount);
-					eco.depositPlayer(paid.Account, paid.Amount);
+					paid.execute(eco);
 					player.sendMessage(String.format(getConfig().getString("messages.use-paid"),eco.format(paid.Amount),eco.format(response.balance)).replaceAll("/n", "\n").split("\n"));
 				} else {
 					player.sendMessage(String.format(getConfig().getString("messages.use-need"),eco.format(paid.Amount)));
