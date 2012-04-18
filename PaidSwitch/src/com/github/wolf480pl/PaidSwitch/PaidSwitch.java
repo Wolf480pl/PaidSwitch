@@ -158,7 +158,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 				event.getBlock().breakNaturally();
 				return;					
 			}
-			if(!eco.hasAccount(event.getLine(1))){
+			if(!(event.getLine(1).substring(0, 1).equalsIgnoreCase("b:") ? eco.hasAccount(event.getLine(1)) : eco.getBanks().contains(event.getLine(1).substring(2)))){
 				event.getPlayer().sendMessage(String.format(getConfig().getString("messages.create-noaccount"),(event.getLine(1))));
 				event.setCancelled(true);
 				getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));

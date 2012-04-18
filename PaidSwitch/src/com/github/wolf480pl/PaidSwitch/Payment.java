@@ -5,7 +5,13 @@ import net.milkbowl.vault.economy.EconomyResponse;
 
 public class Payment {
 	public Payment(String account, String amount){
-		Account = account;
+		if(account.substring(0, 1).equalsIgnoreCase("b:")){
+			bank = true;
+			Account = account.substring(2);
+		} else {
+			bank = false;
+			Account = account;
+		}
 		try{
 			Amount = Double.parseDouble(amount);
 		} catch (NumberFormatException ex){
@@ -15,7 +21,7 @@ public class Payment {
 	public Payment(String account, double amount){
 		if(account.substring(0, 1).equalsIgnoreCase("b:")){
 			bank = true;
-			Account = account.substring(2, account.length());
+			Account = account.substring(2);
 		} else {
 			bank = false;
 			Account = account;
@@ -27,6 +33,9 @@ public class Payment {
 	public boolean bank;
 	public boolean isValid(){
 		return ((Account != null) && (Amount != 0));
+	}
+	public boolean isValid(Economy eco){
+		return ((Account != null) && (bank ? eco.getBanks().contains(Account) : eco.hasAccount(Account)) && (Amount != 0));
 	}
 	public boolean execute(Economy eco){
 		EconomyResponse resp;
