@@ -5,7 +5,7 @@ import net.milkbowl.vault.economy.EconomyResponse;
 
 public class Payment {
 	public Payment(String account, String amount){
-		if(account.substring(0, 1).equalsIgnoreCase("b:")){
+		if(account.substring(0, 2).equalsIgnoreCase("b:")){
 			bank = true;
 			Account = account.substring(2);
 		} else {
@@ -19,7 +19,7 @@ public class Payment {
 		}
 	}
 	public Payment(String account, double amount){
-		if(account.substring(0, 1).equalsIgnoreCase("b:")){
+		if(account.substring(0, 2).equalsIgnoreCase("b:")){
 			bank = true;
 			Account = account.substring(2);
 		} else {
@@ -44,5 +44,8 @@ public class Payment {
 		else
 			resp = eco.depositPlayer(Account, Amount);
 		return resp.transactionSuccess();
+	}
+	public String toString(){
+		return "Payment: " + String.valueOf(Amount) + " for " + (bank ? "bank" : "player") + ": " + Account;
 	}
 }

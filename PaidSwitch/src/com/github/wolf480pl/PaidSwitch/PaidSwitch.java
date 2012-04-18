@@ -82,12 +82,16 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 	}
 	@EventHandler
 	public void onEntityInteract(EntityInteractEvent event){
-		if(event.isCancelled()) return;
-//		String msg = event.getEntity().getType().name() + " uzyl  " + event.getBlock().getType().name() + " !";
-//		getServer().broadcastMessage(msg);
-		if(isSwitch(event.getBlock())){
-			Payment paid = findSign(event.getBlock());
-			if((paid != null) && paid.isValid())event.setCancelled(true);
+		try{
+			if(event.isCancelled()) return;
+//			String msg = event.getEntity().getType().name() + " uzyl  " + event.getBlock().getType().name() + " !";
+//			getServer().broadcastMessage(msg);
+			if(isSwitch(event.getBlock())){
+				Payment paid = findSign(event.getBlock());
+				if((paid != null) && paid.isValid()) event.setCancelled(true);
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
 	}
 	@EventHandler
@@ -158,8 +162,9 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 				event.getBlock().breakNaturally();
 				return;					
 			}
-			if(!(event.getLine(1).substring(0, 1).equalsIgnoreCase("b:") ? eco.hasAccount(event.getLine(1)) : eco.getBanks().contains(event.getLine(1).substring(2)))){
-				event.getPlayer().sendMessage(String.format(getConfig().getString("messages.create-noaccount"),(event.getLine(1))));
+			boolean bank = event.getLine(1).substring(0, 2).equalsIgnoreCase("b:");
+			if(!(bank ? eco.getBanks().contains(event.getLine(1).substring(2)) : eco.hasAccount(event.getLine(1)) )){
+				event.getPlayer().sendMessage(String.format(getConfig().getString("messages.create-noaccount"),( bank ? event.getLine(1).substring(2) + " (bank)" : event.getLine(1) + " (player)") ));
 				event.setCancelled(true);
 				getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
 				event.getBlock().breakNaturally();
@@ -258,6 +263,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 		if(paid == null) paid = checkSign(block, BlockFace.SOUTH);
 		if(paid == null) paid = checkSign(block, BlockFace.WEST);
 		if(paid == null) paid = checkSign(block, BlockFace.DOWN);
+//		log.info(paid.toString());
 		return paid;
 	}
 	
