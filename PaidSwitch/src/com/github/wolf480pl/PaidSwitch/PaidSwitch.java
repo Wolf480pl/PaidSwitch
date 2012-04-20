@@ -40,6 +40,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Vehicle;
 import org.bukkit.event.EventHandler;
 //import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -88,7 +89,12 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 //			getServer().broadcastMessage(msg);
 			if(isSwitch(event.getBlock())){
 				Payment paid = findSign(event.getBlock());
-				if((paid != null) && paid.isValid()) event.setCancelled(true);
+				if((paid != null) && paid.isValid()){
+					if(event.getEntity() instanceof Vehicle && event.getEntity().getPassenger() !=  null && event.getEntity().getPassenger() instanceof Player)
+						event.setCancelled(!processPayment(paid, (Player) event.getEntity().getPassenger()));
+					else
+						event.setCancelled(true);
+				}
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
