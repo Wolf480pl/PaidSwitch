@@ -19,6 +19,7 @@ permissions:
             paidswitch.use: true
             paidswitch.create: true
             paidswitch.create.others: true
+            paidswitch.create.duplicate: true
     paidswitch.use:
         description: Allows to use PaidSwitches.
         default: true

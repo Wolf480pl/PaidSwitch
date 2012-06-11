@@ -153,13 +153,24 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 			event.getBlock().breakNaturally();
 			return;
 		}
-		if(!findSwitch(event.getBlock(), getConfig().getBoolean("detector-rail"))){
+		Block sw = findSwitch(event.getBlock(), getConfig().getBoolean("detector-rail"));
+		if(sw == null){
 			event.getPlayer().sendMessage(getConfig().getString("messages.create-noswitch"));
 			event.setCancelled(true);
 			getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
 			event.getBlock().breakNaturally();
 			return;
 		}
+		Payment pay = findSign(sw); 
+		if(pay != null && pay.isValid(eco))
+			if(!pay.Account.equals(event.getPlayer().getName()))
+				if(!event.getPlayer().hasPermission("paidswitch.create.duplicate")){
+					event.getPlayer().sendMessage(getConfig().getString("messages.create-duplicate"));
+					event.setCancelled(true);
+					getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
+					event.getBlock().breakNaturally();
+					return;
+				}
 		if(!event.getLine(1).isEmpty()){
 			if(!event.getPlayer().hasPermission("paidswitch.create.others")){
 				event.getPlayer().sendMessage(getConfig().getString("messages.create-others"));
@@ -297,12 +308,22 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 	private boolean isRailSwitch(Block  block){
 		return block.getType() == Material.DETECTOR_RAIL;
 	}
-	private boolean findSwitch(Block block, boolean rail){
+/*	private boolean findSwitch(Block block, boolean rail){
 		return isSwitch(block.getRelative(BlockFace.DOWN)) || (rail && isRailSwitch(block.getRelative(BlockFace.DOWN))) || 
 				isSwitch(block.getRelative(BlockFace.SOUTH)) || (rail && isRailSwitch(block.getRelative(BlockFace.SOUTH))) || 
 				isSwitch(block.getRelative(BlockFace.WEST)) ||  (rail && isRailSwitch(block.getRelative(BlockFace.WEST))) ||
 				isSwitch(block.getRelative(BlockFace.NORTH)) ||  (rail && isRailSwitch(block.getRelative(BlockFace.NORTH))) ||
 				isSwitch(block.getRelative(BlockFace.EAST)) ||  (rail && isRailSwitch(block.getRelative(BlockFace.EAST))) ||
 				isSwitch(block.getRelative(BlockFace.UP)) || (rail && isRailSwitch(block.getRelative(BlockFace.UP)));
+	}*/
+	private Block findSwitch(Block block, boolean rail){
+		if(isSwitch(block.getRelative(BlockFace.DOWN)) || (rail && isRailSwitch(block.getRelative(BlockFace.DOWN)))) return block.getRelative(BlockFace.DOWN);  
+		if(isSwitch(block.getRelative(BlockFace.SOUTH)) || (rail && isRailSwitch(block.getRelative(BlockFace.SOUTH)))) return block.getRelative(BlockFace.SOUTH); 
+		if(isSwitch(block.getRelative(BlockFace.WEST)) ||  (rail && isRailSwitch(block.getRelative(BlockFace.WEST)))) return block.getRelative(BlockFace.WEST); 
+		if(isSwitch(block.getRelative(BlockFace.NORTH)) ||  (rail && isRailSwitch(block.getRelative(BlockFace.NORTH)))) return block.getRelative(BlockFace.NORTH);
+		if(isSwitch(block.getRelative(BlockFace.EAST)) ||  (rail && isRailSwitch(block.getRelative(BlockFace.EAST)))) return block.getRelative(BlockFace.EAST);
+		if(isSwitch(block.getRelative(BlockFace.UP)) || (rail && isRailSwitch(block.getRelative(BlockFace.UP)))) return block.getRelative(BlockFace.UP);
+		return null;
 	}
+
 }
