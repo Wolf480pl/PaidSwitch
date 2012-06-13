@@ -90,7 +90,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 			if(isSwitch(event.getBlock())){
 				Payment paid = findSign(event.getBlock());
 				if((paid != null) && paid.isValid()){
-					if(event.getEntity() instanceof Vehicle && event.getEntity().getPassenger() !=  null && event.getEntity().getPassenger() instanceof Player)
+					if(event.getEntity() instanceof Vehicle && event.getEntity().getPassenger() !=  null && event.getEntity().getPassenger() instanceof Player && getConfig().getBoolean("vehicle-support"))
 						event.setCancelled(!processPayment(paid, (Player) event.getEntity().getPassenger()));
 					else
 						event.setCancelled(true);
@@ -108,6 +108,10 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 //		getServer().broadcastMessage(msg);
 		if(isSwitch(event.getClickedBlock())){
 			Payment paid = findSign(event.getClickedBlock());
+			if(paid != null && paid.isValid() && event.getPlayer().getVehicle() != null){
+				event.setCancelled(true);
+				return;
+			}
 			event.setCancelled(!processPayment(paid, event.getPlayer()));
 /*			if((paid != null) && paid.isValid()){
 				if(!event.getPlayer().hasPermission("paidswitch.use")){
