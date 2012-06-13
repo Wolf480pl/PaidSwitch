@@ -34,6 +34,9 @@ permissions:
     paidswitch.create.others:
         description: Allows to create PaidSwitches for someone else.
         default: op
+    paidswitch.create.duplicate:
+        description: Allows to create a second sign for other players' PaidSwitches.
+        default: op
     paidswitch.admin:
         description: Gives access to /paidswitch command.
         default: op
