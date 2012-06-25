@@ -2,14 +2,15 @@ earn-for-free: false
 detector-rail: true
 vehicle-support: true
 messages:
-    use-noperm: You have no permissions to use PaidSwitches!
-    use-free: You used PaidSwitch for free!
-    use-paid: You paid %s for activating the switch./n Now you have %s
-    use-need: You need %s to activate the switch.
-    create-noperm: You don't have permission to create PaidSwitch!
-    create-noswitch: No switch found!
-    create-others: You don't have permission to create PaidSwitch for other players!
-    create-noaccount: Account %s does not exist!
-    create-noprice: "Invalid price: %s"
-    create-ok: Succesfully created PaidSwitch!
-    create-duplicate: You don't have permission to create a second sign for other player's PaidSwitch!
+  use-noperm: '&4You have no permission to use PaidSwitches!'
+  use-free: '&aYou used PaidSwitch for free!'
+  use-paid: '&aYou paid %s for activating the switch./n&aNow you have %s'
+  use-need: '&4You need %s to activate the switch.'
+  create-noperm: '&4You don''t have permission to create PaidSwitch!'
+  create-noswitch: '&4No switch found!'
+  create-others: '&4You don''t have permission to create PaidSwitch for other players!'
+  create-noaccount: '&4Account %s does not exist!'
+  create-noprice: '&4Invalid price: %s'
+  create-ok: '&aSuccesfully created PaidSwitch!'
+  create-duplicate: '&4You don''t have permission to create a second sign for other
+    player''s PaidSwitch!'

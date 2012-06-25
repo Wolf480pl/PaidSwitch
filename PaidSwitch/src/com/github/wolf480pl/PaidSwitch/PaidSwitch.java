@@ -44,6 +44,7 @@ import org.bukkit.entity.Vehicle;
 import org.bukkit.event.EventHandler;
 //import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.block.SignChangeEvent;
@@ -108,7 +109,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 //		getServer().broadcastMessage(msg);
 		if(isSwitch(event.getClickedBlock())){
 			Payment paid = findSign(event.getClickedBlock());
-			if(paid != null && paid.isValid() && event.getPlayer().getVehicle() != null){
+			if(event.getAction() == Action.PHYSICAL && paid != null && paid.isValid() && event.getPlayer().getVehicle() != null){
 				event.setCancelled(true);
 				return;
 			}
@@ -151,7 +152,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 		}
 //		getServer().broadcastMessage("[PaidSw]!");
 		if(!event.getPlayer().hasPermission("paidswitch.create")){
-			event.getPlayer().sendMessage(getConfig().getString("messages.create-noperm"));
+			event.getPlayer().sendMessage(getConfig().getString("messages.create-noperm").replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
 			event.setCancelled(true);
 			getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
 			event.getBlock().breakNaturally();
@@ -159,7 +160,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 		}
 		Block sw = findSwitch(event.getBlock(), getConfig().getBoolean("detector-rail"));
 		if(sw == null){
-			event.getPlayer().sendMessage(getConfig().getString("messages.create-noswitch"));
+			event.getPlayer().sendMessage(getConfig().getString("messages.create-noswitch").replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
 			event.setCancelled(true);
 			getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
 			event.getBlock().breakNaturally();
@@ -169,7 +170,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 		if(pay != null && pay.isValid(eco))
 			if(!pay.Account.equals(event.getPlayer().getName()))
 				if(!event.getPlayer().hasPermission("paidswitch.create.duplicate")){
-					event.getPlayer().sendMessage(getConfig().getString("messages.create-duplicate"));
+					event.getPlayer().sendMessage(getConfig().getString("messages.create-duplicate").replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
 					event.setCancelled(true);
 					getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
 					event.getBlock().breakNaturally();
@@ -177,15 +178,15 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 				}
 		if(!event.getLine(1).isEmpty()){
 			if(!event.getPlayer().hasPermission("paidswitch.create.others")){
-				event.getPlayer().sendMessage(getConfig().getString("messages.create-others"));
+				event.getPlayer().sendMessage(getConfig().getString("messages.create-others").replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
 				event.setCancelled(true);
 				getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
 				event.getBlock().breakNaturally();
 				return;					
 			}
 			boolean bank = event.getLine(1).substring(0, 2).equalsIgnoreCase("b:");
-			if(!(bank ? eco.getBanks().contains(event.getLine(1).substring(2)) : eco.hasAccount(event.getLine(1)) )){
-				event.getPlayer().sendMessage(String.format(getConfig().getString("messages.create-noaccount"),( bank ? event.getLine(1).substring(2) + " (bank)" : event.getLine(1) + " (player)") ));
+			if(!event.getLine(1).equalsIgnoreCase("none") && !(bank ? eco.getBanks().contains(event.getLine(1).substring(2)) : eco.hasAccount(event.getLine(1)) )){
+				event.getPlayer().sendMessage(String.format(getConfig().getString("messages.create-noaccount"),( bank ? event.getLine(1).substring(2) + " (bank)" : event.getLine(1) + " (player)") ).replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
 				event.setCancelled(true);
 				getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
 				event.getBlock().breakNaturally();
@@ -198,13 +199,13 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 		try{
 			Double.parseDouble(event.getLine(2));
 		} catch (NumberFormatException ex) {
-			event.getPlayer().sendMessage(String.format(getConfig().getString("messages.create-noprice"),(event.getLine(2))));
+			event.getPlayer().sendMessage(String.format(getConfig().getString("messages.create-noprice"),(event.getLine(2))).replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
 			event.setCancelled(true);
 			getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
 			event.getBlock().breakNaturally();
 			return;
 		}
-		event.getPlayer().sendMessage(getConfig().getString("messages.create-ok"));
+		event.getPlayer().sendMessage(getConfig().getString("messages.create-ok").replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
 	}
 	@EventHandler()
 	public void onVehicleMove(VehicleMoveEvent event){
@@ -246,12 +247,12 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 	private boolean processPayment(Payment paid, Player player){
 		if((paid != null) && paid.isValid()){
 			if(!player.hasPermission("paidswitch.use")){
-				player.sendMessage(getConfig().getString("messages.use-noperm"));
+				player.sendMessage(getConfig().getString("messages.use-noperm").replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
 				return false;
 			}
 //			getServer().broadcastMessage(paid.Amount + " for " + paid.Account);
 			if(player.hasPermission("paidswitch.use.free")){
-				player.sendMessage(getConfig().getString("messages.use-free"));
+				player.sendMessage(getConfig().getString("messages.use-free").replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
 				if(getConfig().getBoolean("earn-for-free"))
 					if(eco == null && !SetupEco())
 						log.log(Level.SEVERE,"No economy plugin found!");
@@ -267,9 +268,9 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 				if(eco.has(player.getName(), paid.Amount)){
 					EconomyResponse response = eco.withdrawPlayer(player.getName(),paid.Amount);
 					paid.execute(eco);
-					player.sendMessage(String.format(getConfig().getString("messages.use-paid"),eco.format(paid.Amount),eco.format(response.balance)).replaceAll("/n", "\n").split("\n"));
+					player.sendMessage(String.format(getConfig().getString("messages.use-paid"),eco.format(paid.Amount),eco.format(response.balance)).replaceAll("/n", "\n").replaceAll("&([0-9a-fA-F])", "\u00A7$1").split("\n"));
 				} else {
-					player.sendMessage(String.format(getConfig().getString("messages.use-need"),eco.format(paid.Amount)));
+					player.sendMessage(String.format(getConfig().getString("messages.use-need"),eco.format(paid.Amount)).replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
 					return false;
 				}
 			}
