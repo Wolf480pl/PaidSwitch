@@ -61,6 +61,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 	private Economy eco;
 	public void onEnable(){
 		log = getLogger();
+		Payment.log = log;
 		getServer().getPluginManager().registerEvents(this, this);
 		if(SetupEco())
 			log.info("Vault economy found.");
@@ -114,33 +115,6 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 				return;
 			}
 			event.setCancelled(!processPayment(paid, event.getPlayer()));
-/*			if((paid != null) && paid.isValid()){
-				if(!event.getPlayer().hasPermission("paidswitch.use")){
-					event.getPlayer().sendMessage(getConfig().getString("messages.use-noperm"));
-					event.setCancelled(true);
-					return;
-				}
-//				getServer().broadcastMessage(paid.Amount + " for " + paid.Account);
-				if(event.getPlayer().hasPermission("paidswitch.use.free")){
-					event.getPlayer().sendMessage(getConfig().getString("messages.use-free"));
-					if(getConfig().getBoolean("earn-for-free")) eco.depositPlayer(paid.Account, paid.Amount);
-					return;
-				}
-				if((eco == null) && !SetupEco()){
-					log.log(Level.SEVERE,"No economy plugin found!");
-					if(!event.getPlayer().getName().equalsIgnoreCase(paid.Account))
-						event.setCancelled(true);
-				} else {
-					if(eco.has(event.getPlayer().getName(), paid.Amount)){
-						EconomyResponse response = eco.withdrawPlayer(event.getPlayer().getName(),paid.Amount);
-						eco.depositPlayer(paid.Account, paid.Amount);
-						event.getPlayer().sendMessage(String.format(getConfig().getString("messages.use-paid"),eco.format(paid.Amount),eco.format(response.balance)).replaceAll("/n", "\n").split("\n"));
-					} else {
-						event.getPlayer().sendMessage(String.format(getConfig().getString("messages.use-need"),eco.format(paid.Amount)));
-						event.setCancelled(true);
-					}
-				}
-			}*/
 		}
 	}
 	@EventHandler
@@ -150,8 +124,9 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 //			getServer().broadcastMessage(String.format("%s doesn't match [PaidSw]",event.getLine(0)));
 			return;
 		}
-//		getServer().broadcastMessage("[PaidSw]!");
+		log.fine("Create [PaidSw]");
 		if(!event.getPlayer().hasPermission("paidswitch.create")){
+			log.fine("NoPerm");
 			event.getPlayer().sendMessage(getConfig().getString("messages.create-noperm").replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
 			event.setCancelled(true);
 			getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
@@ -161,32 +136,59 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 		Block sw = findSwitch(event.getBlock(), getConfig().getBoolean("detector-rail"));
 		if(sw == null){
 			event.getPlayer().sendMessage(getConfig().getString("messages.create-noswitch").replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
+			log.fine("NoSwitch\n");
 			event.setCancelled(true);
 			getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
 			event.getBlock().breakNaturally();
 			return;
 		}
-		Payment pay = findSign(sw); 
-		if(pay != null && pay.isValid(eco))
-			if(!pay.Account.equals(event.getPlayer().getName()))
+		log.finer(sw.toString());
+		Payment pay = findSign(sw);
+		log.finer(String.valueOf(pay));
+		if(pay != null && pay.isValid(eco)) {
+			log.fine("Another payment");
+			log.finer(pay.toString());
+			if(!pay.Account.equals(event.getPlayer().getName())) {
+				log.fine("Different name");
 				if(!event.getPlayer().hasPermission("paidswitch.create.duplicate")){
 					event.getPlayer().sendMessage(getConfig().getString("messages.create-duplicate").replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
+					log.fine("Duplicate NoPerm");
 					event.setCancelled(true);
 					getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
 					event.getBlock().breakNaturally();
 					return;
 				}
+			}
+		}
 		if(!event.getLine(1).isEmpty()){
+			log.fine("Specified Account");
+			log.finer(event.getLine(1));
 			if(!event.getPlayer().hasPermission("paidswitch.create.others")){
 				event.getPlayer().sendMessage(getConfig().getString("messages.create-others").replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
+				log.fine("Others Noperm");
 				event.setCancelled(true);
 				getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
 				event.getBlock().breakNaturally();
 				return;					
 			}
-			boolean bank = event.getLine(1).substring(0, 2).equalsIgnoreCase("b:");
+			boolean bank = false;
+			if (event.getLine(1).length() >= 2) {
+				bank = event.getLine(1).substring(0, 2).equalsIgnoreCase("b:");
+			}
+			if (bank) {
+				log.fine("bank");
+				try {
+					eco.getBanks();
+				} catch (UnsupportedOperationException e) {
+					event.getPlayer().sendMessage(getConfig().getString("messages.create-nobank").replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
+					log.fine("Bank unsupported");
+					bank = false;
+					event.setLine(1, event.getLine(1).substring(2));
+				}
+			}
 			if(!event.getLine(1).equalsIgnoreCase("none") && !(bank ? eco.getBanks().contains(event.getLine(1).substring(2)) : eco.hasAccount(event.getLine(1)) )){
 				event.getPlayer().sendMessage(String.format(getConfig().getString("messages.create-noaccount"),( bank ? event.getLine(1).substring(2) + " (bank)" : event.getLine(1) + " (player)") ).replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
+				log.fine("NoAccount");
 				event.setCancelled(true);
 				getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
 				event.getBlock().breakNaturally();
@@ -194,18 +196,21 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 			}
 		} else {
 			event.setLine(1, event.getPlayer().getName());
-//			getServer().broadcastMessage("Setting player name!");
+			log.fine("Setting player name");
 		}
+		log.finer(event.getLine(2));
 		try{
 			Double.parseDouble(event.getLine(2));
 		} catch (NumberFormatException ex) {
 			event.getPlayer().sendMessage(String.format(getConfig().getString("messages.create-noprice"),(event.getLine(2))).replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
+			log.fine("Noprice");
 			event.setCancelled(true);
 			getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
 			event.getBlock().breakNaturally();
 			return;
 		}
 		event.getPlayer().sendMessage(getConfig().getString("messages.create-ok").replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
+		log.fine("Created ok");
 	}
 	@EventHandler()
 	public void onVehicleMove(VehicleMoveEvent event){
@@ -292,10 +297,14 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 	private Payment checkSign(Block block, BlockFace face){
 		BlockState bl = block.getRelative(face).getState();
 		if(bl instanceof Sign){
-//			getServer().broadcastMessage(((Sign) bl).getLine(0));
-			if(((Sign) bl).getLine(0).equalsIgnoreCase("[PaidSw]"))
+			log.fine("Sign found at " + face.name());
+			log.finer(((Sign) bl).getLine(0));
+			if(((Sign) bl).getLine(0).equalsIgnoreCase("[PaidSw]")) {
+				log.fine("Good sign");
 				return new Payment(((Sign) bl).getLine(1),((Sign) bl).getLine(2));
+			}
 		}
+		log.finer("No good at " + face.name());
 		return null;
 	}
 	private boolean SetupEco(){
