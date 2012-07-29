@@ -1,17 +1,13 @@
 package com.github.wolf480pl.PaidSwitch;
 
+import java.util.logging.Logger;
+
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 
 public class Payment {
+	public static Logger log;
 	public Payment(String account, String amount){
-		/*if(account.substring(0, 2).equalsIgnoreCase("b:")){
-			bank = true;
-			Account = account.substring(2);
-		} else {
-			bank = false;
-			Account = account;
-		}*/
 		parseAccount(account);
 		try{
 			Amount = Double.parseDouble(amount);
@@ -20,13 +16,6 @@ public class Payment {
 		}
 	}
 	public Payment(String account, double amount){
-		/*if(account.substring(0, 2).equalsIgnoreCase("b:")){
-			bank = true;
-			Account = account.substring(2);
-		} else {
-			bank = false;
-			Account = account;
-		}*/
 		parseAccount(account);
 		Amount = amount;
 	}
@@ -44,10 +33,28 @@ public class Payment {
 		return ((none || Account != null) && (Amount != 0));
 	}
 	public boolean isValid(Economy eco){
-		return (none || ((Account != null) && (bank ? eco.getBanks().contains(Account) : eco.hasAccount(Account)))) && (Amount != 0);
+		if (bank) {
+			try {
+				eco.getBanks();
+			} catch (UnsupportedOperationException e) {
+				log.fine("Bank unsupported");
+				bank = false;
+			}
+		}
+		return (none
+				|| (	(Account != null)
+						&& (bank
+								? eco.getBanks().contains(Account)
+								: eco.hasAccount(Account)
+							)
+					)
+				) && (Amount != 0);
 	}
 	public boolean execute(Economy eco){
 		EconomyResponse resp;
+		if (!this.isValid(eco)) {
+			return false;
+		}
 		if(none) return true;
 		if(bank)
 			resp = eco.bankDeposit(Account, Amount);
