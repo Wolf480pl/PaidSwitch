@@ -63,10 +63,11 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 		log = getLogger();
 		Payment.log = log;
 		getServer().getPluginManager().registerEvents(this, this);
-		if(SetupEco())
+		if(SetupEco()) {
 			log.info("Vault economy found.");
-		else
+		} else {
 			log.info("Vault economy not found yet.");
+		}
 		parseConfig();
 	}
 	public void onDisable(){
@@ -104,7 +105,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 			if(event.isCancelled()) return;
 //			String msg = event.getEntity().getType().name() + " uzyl  " + event.getBlock().getType().name() + " !";
 //			getServer().broadcastMessage(msg);
-			if(isSwitch(event.getBlock())){
+			if(isSwitch(event.getBlock(), true, true)){
 				Payment paid = findSign(event.getBlock());
 				if((paid != null) && paid.isValid()){
 					if(event.getEntity() instanceof Vehicle && event.getEntity().getPassenger() !=  null && event.getEntity().getPassenger() instanceof Player && getConfig().getBoolean("vehicle-support"))
@@ -123,7 +124,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 		if(event.isCancelled()) return;
 //		String msg = event.getPlayer().getName() + " uzyl  " + event.getAction().name() + " na " + event.getClickedBlock().getType().name() + " !";
 //		getServer().broadcastMessage(msg);
-		if(isSwitch(event.getClickedBlock())){
+		if(isInteractSwitch(event.getClickedBlock())){
 			Payment paid = findSign(event.getClickedBlock());
 			if(event.getAction() == Action.PHYSICAL && paid != null && paid.isValid() && event.getPlayer().getVehicle() != null){
 				event.setCancelled(true);
@@ -148,7 +149,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 			event.getBlock().breakNaturally();
 			return;
 		}
-		Block sw = findSwitch(event.getBlock(), getConfig().getBoolean("detector-rail"));
+		Block sw = findSwitch(event.getBlock(), true, true);
 		if(sw == null){
 			event.getPlayer().sendMessage(getConfig().getString("messages.create-noswitch").replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
 			log.fine("NoSwitch\n");
@@ -158,6 +159,14 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 			return;
 		}
 		log.finer(sw.toString());
+		if (!canCreate(event.getPlayer(), sw.getType())) {
+			log.fine("NoPerm-Type");
+			event.getPlayer().sendMessage(String.format(getConfig().getString("messages.create-noperm-type"), sw.getType().toString()).replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
+			event.setCancelled(true);
+			getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(),event.getPlayer()));
+			event.getBlock().breakNaturally();
+			return;
+		}
 		Payment pay = findSign(sw);
 		log.finer(String.valueOf(pay));
 		if(pay != null && pay.isValid(eco)) {
@@ -328,31 +337,44 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 			eco = ecoProvider.getProvider();
 		return (eco != null);
 	}
-	private boolean isSwitch(Block block){
-		return block.getType().equals(Material.WOOD_PLATE) ||
-				block.getType().equals(Material.STONE_PLATE) ||
-				block.getType().equals(Material.STONE_BUTTON) ||
-				block.getType().equals(Material.LEVER);
+	private boolean isSwitch(Block block, boolean interact, boolean rail){
+		return (interact && isInteractSwitch(block)) ||
+				(rail && isRailSwitch(block));
+	}
+	private boolean isInteractSwitch(Block block) {
+		return (block.getType().equals(Material.WOOD_PLATE) && getConfig().getBoolean("allowed-switches.wood-plate")) ||
+				(block.getType().equals(Material.STONE_PLATE) && getConfig().getBoolean("allowed-switches.stone-plate")) ||
+				(block.getType().equals(Material.STONE_BUTTON) && getConfig().getBoolean("allowed-switches.button")) ||
+				(block.getType().equals(Material.LEVER)  && getConfig().getBoolean("allowed-switches.lever"));
 	}
 	private boolean isRailSwitch(Block  block){
-		return block.getType() == Material.DETECTOR_RAIL;
+		return ((block.getType() == Material.DETECTOR_RAIL) && getConfig().getBoolean("allowed-switches.detector-rail"));
 	}
-/*	private boolean findSwitch(Block block, boolean rail){
-		return isSwitch(block.getRelative(BlockFace.DOWN)) || (rail && isRailSwitch(block.getRelative(BlockFace.DOWN))) || 
-				isSwitch(block.getRelative(BlockFace.SOUTH)) || (rail && isRailSwitch(block.getRelative(BlockFace.SOUTH))) || 
-				isSwitch(block.getRelative(BlockFace.WEST)) ||  (rail && isRailSwitch(block.getRelative(BlockFace.WEST))) ||
-				isSwitch(block.getRelative(BlockFace.NORTH)) ||  (rail && isRailSwitch(block.getRelative(BlockFace.NORTH))) ||
-				isSwitch(block.getRelative(BlockFace.EAST)) ||  (rail && isRailSwitch(block.getRelative(BlockFace.EAST))) ||
-				isSwitch(block.getRelative(BlockFace.UP)) || (rail && isRailSwitch(block.getRelative(BlockFace.UP)));
-	}*/
-	private Block findSwitch(Block block, boolean rail){
-		if(isSwitch(block.getRelative(BlockFace.DOWN)) || (rail && isRailSwitch(block.getRelative(BlockFace.DOWN)))) return block.getRelative(BlockFace.DOWN);  
-		if(isSwitch(block.getRelative(BlockFace.SOUTH)) || (rail && isRailSwitch(block.getRelative(BlockFace.SOUTH)))) return block.getRelative(BlockFace.SOUTH); 
-		if(isSwitch(block.getRelative(BlockFace.WEST)) ||  (rail && isRailSwitch(block.getRelative(BlockFace.WEST)))) return block.getRelative(BlockFace.WEST); 
-		if(isSwitch(block.getRelative(BlockFace.NORTH)) ||  (rail && isRailSwitch(block.getRelative(BlockFace.NORTH)))) return block.getRelative(BlockFace.NORTH);
-		if(isSwitch(block.getRelative(BlockFace.EAST)) ||  (rail && isRailSwitch(block.getRelative(BlockFace.EAST)))) return block.getRelative(BlockFace.EAST);
-		if(isSwitch(block.getRelative(BlockFace.UP)) || (rail && isRailSwitch(block.getRelative(BlockFace.UP)))) return block.getRelative(BlockFace.UP);
+	private Block findSwitch(Block block, boolean interact, boolean rail){
+		if(isSwitch(block.getRelative(BlockFace.DOWN), interact, rail)) return block.getRelative(BlockFace.DOWN);  
+		if(isSwitch(block.getRelative(BlockFace.SOUTH), interact, rail)) return block.getRelative(BlockFace.SOUTH); 
+		if(isSwitch(block.getRelative(BlockFace.WEST), interact, rail)) return block.getRelative(BlockFace.WEST); 
+		if(isSwitch(block.getRelative(BlockFace.NORTH), interact, rail)) return block.getRelative(BlockFace.NORTH);
+		if(isSwitch(block.getRelative(BlockFace.EAST), interact, rail)) return block.getRelative(BlockFace.EAST);
+		if(isSwitch(block.getRelative(BlockFace.UP), interact, rail)) return block.getRelative(BlockFace.UP);
 		return null;
+	}
+	private boolean canCreate(Player player, Material type) {
+		if (!getConfig().getBoolean("switch-type-permission-needed")) {
+			return true;
+		}
+		if (type.equals(Material.STONE_PLATE)) {
+			return player.hasPermission("paidswitch.create.type.stone-plate");
+		} else if (type.equals(Material.WOOD_PLATE)) {
+			return player.hasPermission("paidswitch.create.type.wood-plate");
+		} else if (type.equals(Material.STONE_BUTTON)) {
+			return player.hasPermission("paidswitch.create.type.button");
+		} else if (type.equals(Material.LEVER)) {
+			return player.hasPermission("paidswitch.create.type.lever");
+		} else if (type.equals(Material.DETECTOR_RAIL)) {
+			return player.hasPermission("paidswitch.create.type.detector-rail");
+		}
+		return false;
 	}
 
 }

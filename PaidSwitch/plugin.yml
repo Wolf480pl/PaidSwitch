@@ -37,6 +37,30 @@ permissions:
     paidswitch.create.duplicate:
         description: Allows to create a second sign for other players' PaidSwitches.
         default: op
+    paidswitch.create.type.*:
+        description: Allows to crate all types of PaidSwitches.
+        default: op
+        children:
+            paidswitch.create.type.wood-plate: true
+            paidswitch.create.type.stone-plate: true
+            paidswitch.create.type.button: true
+            paidswitch.create.type.lever: true
+            paidswitch.create.type.detector-rail: true
+    paidswitch.create.type.wood-plate:
+        description: Allows to crate paid wood plate.
+        default: op
+    paidswitch.create.type.stone-plate:
+        description: Allows to crate paid stone plate.
+        default: op
+    paidswitch.create.type.button:
+        description: Allows to crate paid button.
+        default: op
+    paidswitch.create.type.lever:
+        description: Allows to crate paid lever.
+        default: op
+    paidswitch.create.type.detector-rail:
+        description: Allows to crate paid wood plate.
+        default: op
     paidswitch.admin:
         description: Gives access to /paidswitch command.
         default: op
