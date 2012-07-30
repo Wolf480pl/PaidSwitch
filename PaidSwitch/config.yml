@@ -14,3 +14,4 @@ messages:
   create-noprice: '&4Invalid price: %s'
   create-ok: '&aSuccesfully created PaidSwitch!'
   create-duplicate: '&4You don''t have permission to create a second sign for other player''s PaidSwitch!'
+log-level: INFO
