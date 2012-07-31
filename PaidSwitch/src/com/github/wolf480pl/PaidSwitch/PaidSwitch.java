@@ -67,15 +67,30 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 			log.info("Vault economy found.");
 		else
 			log.info("Vault economy not found yet.");
-		getConfig().options().copyDefaults(true);
-		saveConfig();
+		parseConfig();
 	}
 	public void onDisable(){
 	}
+	
+	private void parseConfig() {
+		getConfig().options().copyDefaults(true);
+		saveConfig();
+		String lvl = getConfig().getString("log-level");
+		Level loglvl;
+		try {
+			loglvl = Level.parse(lvl);
+		} catch (Exception e) {
+			e.printStackTrace();
+			loglvl = Level.INFO;
+		}
+		log.setLevel(loglvl);
+	}
+	
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
 		if(cmd.getName().equalsIgnoreCase("paidswitch")){
 			if(args.length > 0){
 				reloadConfig();
+				parseConfig();
 				sender.sendMessage("[PaidSwitch] Config reloaded.");
 			} else
 				sender.sendMessage(cmd.getUsage().split("\n"));
