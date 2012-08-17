@@ -1,14 +1,14 @@
 name: PaidSwitch
 main: com.github.wolf480pl.PaidSwitch.PaidSwitch
-version: 0.5.2
+version: 0.6
 depend: [Vault]
 commands:
     paidswitch:
         description: Info about PaidSwitch and config reload.
         aliases: [paidsw, psw]
-        parmission: paidswitch.admin
+        permission: paidswitch.admin
         usage: |
-            PaidSwitch 0.5.2 by Wolf480pl (wolf480@interia.pl)
+            PaidSwitch 0.6 by Wolf480pl (wolf480@interia.pl)
             Usage:
             /paidswitch reload - reload config.yml
             Aliases: /paidsw, /psw

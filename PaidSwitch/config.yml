@@ -13,7 +13,7 @@ messages:
   use-paid: '&aYou paid %s for activating the switch./n&aNow you have %s'
   use-need: '&4You need %s to activate the switch.'
   create-noperm: "&4You don't have permission to create PaidSwitch!"
-  create-noperm-type: "&4You don't have permission to create p!"
+  create-noperm-type: "&4You don't have permission to create paid %s!"
   create-noswitch: '&4No switch found!'
   create-others: '&4You don''t have permission to create PaidSwitch for other players!'
   create-noaccount: '&4Account %s does not exist!'
