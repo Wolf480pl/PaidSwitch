@@ -20,6 +20,7 @@ permissions:
             paidswitch.create: true
             paidswitch.create.others: true
             paidswitch.create.duplicate: true
+            paidswitch.create.type.*: true
     paidswitch.use:
         description: Allows to use PaidSwitches.
         default: true
@@ -39,7 +40,6 @@ permissions:
         default: op
     paidswitch.create.type.*:
         description: Allows to crate all types of PaidSwitches.
-        default: op
         children:
             paidswitch.create.type.wood-plate: true
             paidswitch.create.type.stone-plate: true
