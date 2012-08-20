@@ -1,6 +1,6 @@
 name: PaidSwitch
 main: com.github.wolf480pl.PaidSwitch.PaidSwitch
-version: 0.6
+version: 0.6.1
 depend: [Vault]
 commands:
     paidswitch:
@@ -8,7 +8,7 @@ commands:
         aliases: [paidsw, psw]
         permission: paidswitch.admin
         usage: |
-            PaidSwitch 0.6 by Wolf480pl (wolf480@interia.pl)
+            PaidSwitch 0.6.1 by Wolf480pl (wolf480@interia.pl)
             Usage:
             /paidswitch reload - reload config.yml
             Aliases: /paidsw, /psw
@@ -20,6 +20,7 @@ permissions:
             paidswitch.create: true
             paidswitch.create.others: true
             paidswitch.create.duplicate: true
+            paidswitch.create.type.*: true
     paidswitch.use:
         description: Allows to use PaidSwitches.
         default: true
@@ -39,7 +40,6 @@ permissions:
         default: op
     paidswitch.create.type.*:
         description: Allows to crate all types of PaidSwitches.
-        default: op
         children:
             paidswitch.create.type.wood-plate: true
             paidswitch.create.type.stone-plate: true
