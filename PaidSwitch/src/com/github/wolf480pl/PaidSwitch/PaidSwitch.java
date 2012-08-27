@@ -23,7 +23,9 @@ distribution.
 
 package com.github.wolf480pl.PaidSwitch;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,6 +39,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -224,7 +227,15 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 		}
 		log.finer(event.getLine(2));
 		try{
-			Double.parseDouble(event.getLine(2));
+			double price = Double.parseDouble(event.getLine(2));
+			if (!checkLimit(event.getPlayer(), price)) {
+				event.getPlayer().sendMessage(String.format(getConfig().getString("messages.create-exceeded-price"), eco.format(getLimit(event.getPlayer()))).replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
+				log.fine("PriceLimit");
+				event.setCancelled(true);
+				getServer().getPluginManager().callEvent(new BlockBreakEvent(event.getBlock(), event.getPlayer()));
+				event.getBlock().breakNaturally();
+				return;
+			}
 		} catch (NumberFormatException ex) {
 			event.getPlayer().sendMessage(String.format(getConfig().getString("messages.create-noprice"),(event.getLine(2))).replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
 			log.fine("Noprice");
@@ -376,5 +387,26 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 		}
 		return false;
 	}
-
+	
+	// 0 means unlimited
+	private double getLimit(Player player) {
+		ConfigurationSection priceLimits = getConfig().getConfigurationSection("limits.price");
+		Set<String> limits = priceLimits.getKeys(false);
+		Iterator<String> i = limits.iterator();
+		if (player.hasPermission("paidswitch.limit.price.none")) {
+			return 0;
+		}
+		while (i.hasNext()) {
+			String name = i.next();
+			if (player.hasPermission("paidswitch.limit.price." + name)) {
+				return priceLimits.getDouble(name);
+			}
+		}
+		return priceLimits.getDouble("default");
+	}
+	
+	private boolean checkLimit(Player player, double price) {
+		double limit = getLimit(player); 
+		return (limit == 0) || (limit >= price);
+	}
 }

@@ -21,6 +21,7 @@ permissions:
             paidswitch.create.others: true
             paidswitch.create.duplicate: true
             paidswitch.create.type.*: true
+            paidswitch.limit.price.none: true
     paidswitch.use:
         description: Allows to use PaidSwitches.
         default: true
@@ -61,6 +62,12 @@ permissions:
     paidswitch.create.type.detector-rail:
         description: Allows to crate paid wood plate.
         default: op
+    paidswitch.limit.price.none:
+        description: Allows to create PaidSwitches with unlimited price.
+        default: op
+    paidswitch.limit.price.limit1:
+        description: "Sets user's price limit to limit1 from config."
+        default: false
     paidswitch.admin:
         description: Gives access to /paidswitch command.
         default: op
