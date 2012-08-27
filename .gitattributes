@@ -1,2 +1,2 @@
 build.version merge=binary -diff
-*.jar bynary merge=binary
+*.jar binary merge=binary
