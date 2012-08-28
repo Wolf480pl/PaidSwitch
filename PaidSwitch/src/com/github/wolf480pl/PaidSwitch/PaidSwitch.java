@@ -293,11 +293,16 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 //			getServer().broadcastMessage(paid.Amount + " for " + paid.Account);
 			if(player.hasPermission("paidswitch.use.free")){
 				player.sendMessage(getConfig().getString("messages.use-free").replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
-				if(getConfig().getBoolean("earn-for-free"))
-					if(eco == null && !SetupEco())
+				if(getConfig().getBoolean("earn-for-free")) {
+					if(eco == null && !SetupEco()) {
 						log.log(Level.SEVERE,"No economy plugin found!");
-					else
+					} else {
 						paid.execute(eco);
+						notifyOwner(paid, player, false);
+					}
+				} else {
+					notifyOwner(paid, player, true);
+				}
 				return true;
 			}
 			if((eco == null) && !SetupEco()){
@@ -309,6 +314,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 					EconomyResponse response = eco.withdrawPlayer(player.getName(),paid.Amount);
 					paid.execute(eco);
 					player.sendMessage(String.format(getConfig().getString("messages.use-paid"),eco.format(paid.Amount),eco.format(response.balance)).replaceAll("/n", "\n").replaceAll("&([0-9a-fA-F])", "\u00A7$1").split("\n"));
+					notifyOwner(paid, player, false);
 				} else {
 					player.sendMessage(String.format(getConfig().getString("messages.use-need"),eco.format(paid.Amount)).replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
 					return false;
@@ -336,7 +342,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 			log.finer(((Sign) bl).getLine(0));
 			if(((Sign) bl).getLine(0).equalsIgnoreCase("[PaidSw]")) {
 				log.fine("Good sign");
-				return new Payment(((Sign) bl).getLine(1),((Sign) bl).getLine(2));
+				return new Payment(((Sign) bl).getLine(1),((Sign) bl).getLine(2), ((Sign) bl).getLine(3), block.getType());
 			}
 		}
 		log.finer("No good at " + face.name());
@@ -408,5 +414,16 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 	private boolean checkLimit(Player player, double price) {
 		double limit = getLimit(player); 
 		return (limit == 0) || (limit >= price);
+	}
+	
+	private void notifyOwner(Payment pay, Player user, boolean free) {
+		if (!getConfig().getBoolean("notify-owner" + (free ? "-free" : ""))) {
+			return;
+		}
+		Player owner = getServer().getPlayer(pay.Account);
+		if (owner == null) {
+			return;
+		}
+		owner.sendMessage(String.format(getConfig().getString("messages.use-notify"), user.getName(), pay.type.toString(), pay.description, free ? getConfig().getString("messages.use-notify-free") : eco.format(pay.Amount)).replaceAll("/n", "\n").replaceAll("&([0-9a-fA-F])", "\u00A7$1").split("\n"));
 	}
 }

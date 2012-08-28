@@ -7,6 +7,8 @@ allowed-switches:
   lever: true
   detector-rail: true
 vehicle-support: true
+notify-owner: true
+notify-owner-free: true
 limits:
   price:
     default: 0
@@ -15,6 +17,8 @@ messages:
   use-free: '&aYou used PaidSwitch for free!'
   use-paid: '&aYou paid %s for activating the switch./n&aNow you have %s'
   use-need: '&4You need %s to activate the switch.'
+  use-notify: '&a%1$s used your paid %2$s (%3$s) for %4$s'
+  use-notify-free: 'free'
   create-noperm: '&4You don''t have permission to create PaidSwitch!'
   create-noperm-type: '&4You don''t have permission to create paid %s!'
   create-noswitch: '&4No switch found!'
