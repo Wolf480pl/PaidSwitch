@@ -417,6 +417,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 	}
 	
 	private void notifyOwner(Payment pay, Player user, boolean free) {
+		if (pay.bank) return;
 		if (!getConfig().getBoolean("notify-owner" + (free ? "-free" : ""))) {
 			return;
 		}
@@ -424,6 +425,6 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 		if (owner == null) {
 			return;
 		}
-		owner.sendMessage(String.format(getConfig().getString("messages.use-notify"), user.getName(), pay.type.toString(), pay.description, free ? getConfig().getString("messages.use-notify-free") : eco.format(pay.Amount)).replaceAll("/n", "\n").replaceAll("&([0-9a-fA-F])", "\u00A7$1").split("\n"));
+		owner.sendMessage(String.format(getConfig().getString("messages.use-notify"), user.getName(), getConfig().getString("messages.switches." + pay.type.toString()), pay.description, free ? getConfig().getString("messages.use-notify-free") : eco.format(pay.Amount)).replaceAll("/n", "\n").replaceAll("&([0-9a-fA-F])", "\u00A7$1").split("\n"));
 	}
 }
