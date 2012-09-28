@@ -24,7 +24,7 @@ public class Payment {
 	public Payment(String account, String amount){
 		parseAccount(account);
 		try{
-			Amount = Double.parseDouble(amount);
+			Amount = Double.parseDouble(amount.split("\\s")[0]);
 		} catch (NumberFormatException ex){
 			Amount = 0;
 		}

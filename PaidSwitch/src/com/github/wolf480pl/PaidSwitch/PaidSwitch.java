@@ -236,6 +236,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 				event.getBlock().breakNaturally();
 				return;
 			}
+		    event.setLine(2, event.getLine(2) + " " + ((price > 1) ? eco.currencyNamePlural() : eco.currencyNameSingular()));
 		} catch (NumberFormatException ex) {
 			event.getPlayer().sendMessage(String.format(getConfig().getString("messages.create-noprice"),(event.getLine(2))).replaceAll("&([0-9a-fA-F])", "\u00A7$1"));
 			log.fine("Noprice");
