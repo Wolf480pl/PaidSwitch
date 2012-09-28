@@ -417,7 +417,7 @@ public class PaidSwitch extends JavaPlugin implements Listener {
 	}
 	
 	private void notifyOwner(Payment pay, Player user, boolean free) {
-		if (pay.bank) return;
+		if (pay.bank || pay.none) return;
 		if (!getConfig().getBoolean("notify-owner" + (free ? "-free" : ""))) {
 			return;
 		}

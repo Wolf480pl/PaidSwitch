@@ -9,6 +9,13 @@ import net.milkbowl.vault.economy.EconomyResponse;
 
 public class Payment {
 	public static Logger log;
+    public String Account;
+    public double Amount;
+    public boolean bank;
+    public boolean none;
+    public String description = null;
+    public Material type = null;
+    
 	public Payment(String account, String amount, String desc, Material type) {
 		this(account, amount);
 		this.description = desc;
@@ -38,12 +45,6 @@ public class Payment {
 		bank = payment.bank;
 		none = payment.none;
 	}
-	public String Account;
-	public double Amount;
-	public boolean bank;
-	public boolean none;
-	public String description = null;
-	public Material type = null;
 	public boolean isValid(){
 		return ((none || Account != null) && (Amount != 0));
 	}
@@ -80,7 +81,7 @@ public class Payment {
 	public String toString(){
 		return "Payment: " + String.valueOf(Amount) + " for " + (bank ? "bank" : "player") + ": " + Account;
 	}
-	void parseAccount(String account){
+	private void parseAccount(String account){
 		if(account.equalsIgnoreCase("none")){
 			none = true;
 			return;
