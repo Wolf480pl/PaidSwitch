@@ -1,6 +1,6 @@
 name: PaidSwitch
 main: com.github.wolf480pl.PaidSwitch.PaidSwitch
-version: 0.7
+version: 0.7.1
 depend: [Vault]
 commands:
     paidswitch:
